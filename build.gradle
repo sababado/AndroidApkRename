@@ -1,10 +1,6 @@
 apply plugin: 'groovy'
 apply plugin: 'maven'
 
-archivesBaseName = "apk-rename"
-version = "0.8.8.1"
-group "com.sababado.android"
-
 repositories {
     mavenCentral()
 }
@@ -14,10 +10,4 @@ dependencies {
     compile gradleApi()
 }
 
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            repository(url: "file:///Applications/Android Studio.app/Contents/gradle/m2repository/")
-        }
-    }
-}
+apply from: 'mvn_push.gradle'
