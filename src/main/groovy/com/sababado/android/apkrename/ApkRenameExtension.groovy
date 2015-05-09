@@ -5,7 +5,9 @@ package com.sababado.android.apkrename
  * Created by robert on 5/9/15.
  */
 class ApkRenameExtension {
-    String variant
+    String[] buildTypes
+    String[] variants
     String applicationName
     ApkNamePart[] include
+    Map<Integer, String> flavors
 }

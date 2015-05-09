@@ -12,7 +12,7 @@ class ApkRenamePlugin implements Plugin<Project> {
 
         // make per-variant version code
         project.android.applicationVariants.all { variant ->
-            if (variant.name == apkRenameConfig.variant) {
+            if (shouldVariantBeRenamed(variant, apkRenameConfig)) {
                 // set the composite code
                 def appName = apkRenameConfig.applicationName
 
@@ -31,6 +31,25 @@ class ApkRenamePlugin implements Plugin<Project> {
                 }
             }
         }
+    }
+
+    private static boolean shouldVariantBeRenamed(def variant, ApkRenameExtension apkRenameConfig) {
+        println "${variant.name} / ${variant.buildType.name}"
+        // check if the variant is in the build type
+        // If there are build types then the variant must be in the build type.
+        if (!apkRenameConfig.buildTypes || variant.buildType.name in apkRenameConfig.buildTypes) {
+            // If the variant is in the build type it must be in the given variants (if there are given variants)
+            return variantIsInVariants(variant, apkRenameConfig)
+        } else if (apkRenameConfig.buildTypes) {
+            // Not in the build type
+            return false;
+        }
+        // The variant must be in the given variants (if there are given variants)
+        return variantIsInVariants(variant, apkRenameConfig)
+    }
+
+    private static boolean variantIsInVariants(def variant, ApkRenameExtension apkRenameConfig) {
+        return !apkRenameConfig.variants || variant.name in apkRenameConfig.variants;
     }
 
     /**
@@ -78,8 +97,14 @@ class ApkRenamePlugin implements Plugin<Project> {
         if (!apkRenameConfig.applicationName) {
             throw new RuntimeException("applicationName is required in apkRename.")
         }
-        if (!apkRenameConfig.variant) {
-            throw new RuntimeException("variant is required in apkRename.")
+        boolean emptyBuildTypes = false;
+        if (!apkRenameConfig.buildTypes || apkRenameConfig.buildTypes.length == 0) {
+            emptyBuildTypes = true;
+        }
+        if (!apkRenameConfig.variants || apkRenameConfig.variants.length == 0) {
+            if (emptyBuildTypes) {
+                throw new RuntimeException("At least one variant or buildType is required in apkRename.")
+            }
         }
     }
 
@@ -91,10 +116,18 @@ class ApkRenamePlugin implements Plugin<Project> {
      * @return A name with at least ".apk"
      */
     private static String buildApkNameExtras(Project project, def variant, ApkRenameExtension apkRenameConfig) {
-        println "***********  ${apkRenameConfig.include}"
-        // set the composite code
-        def vCode = variant.mergedFlavor.versionCode
-        def vName = variant.mergedFlavor.versionName
+        println "***********  ${project.android.defaultConfig.versionCode}"
+        FlavorPart flavorPart = getFlavorPart(variant, apkRenameConfig.flavors);
+        String flavorPartName = flavorPart.name
+        if (!flavorPartName?.isEmpty()) {
+            flavorPartName = ".${flavorPartName}"
+        }
+
+        def vName = project.android.defaultConfig.versionName + "${flavorPartName}"
+        def vCode = project.android.defaultConfig.versionCode + flavorPart.apiVersion
+        variant.mergedFlavor.versionName = vName
+        variant.mergedFlavor.versionCode = vCode
+
         def include = apkRenameConfig.include
 
         // set the output file name
@@ -108,10 +141,30 @@ class ApkRenamePlugin implements Plugin<Project> {
         return nameExtras
     }
 
+    private static FlavorPart getFlavorPart(def variant, Map<Integer, String> flavors) {
+        if (flavors) {
+            int apiVersion = variant.productFlavors.get(0).versionCode
+            if (flavors.containsKey(apiVersion)) {
+                return new FlavorPart(flavors.get(apiVersion), apiVersion);
+            }
+        }
+        return new FlavorPart("", 0);
+    }
+
     private static String getNamePart(ApkNamePart[] include, ApkNamePart namePart, String extra) {
         if (include && namePart in include) {
             return extra
         }
         return ""
+    }
+
+    static class FlavorPart {
+        String name
+        int apiVersion
+
+        FlavorPart(String name, int apiVersion) {
+            this.name = name
+            this.apiVersion = apiVersion
+        }
     }
 }

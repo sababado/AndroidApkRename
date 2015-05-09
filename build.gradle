@@ -2,7 +2,7 @@ apply plugin: 'groovy'
 apply plugin: 'maven'
 
 archivesBaseName = "apk-rename"
-version = "0.7.9.3"
+version = "0.8.8.1"
 group "com.sababado.android"
 
 repositories {
