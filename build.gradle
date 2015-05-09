@@ -1,0 +1,23 @@
+apply plugin: 'groovy'
+apply plugin: 'maven'
+
+archivesBaseName = "apk-rename"
+version = "0.7.9.3"
+group "com.sababado.android"
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile localGroovy()
+    compile gradleApi()
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: "file:///Applications/Android Studio.app/Contents/gradle/m2repository/")
+        }
+    }
+}
