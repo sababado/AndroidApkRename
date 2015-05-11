@@ -44,7 +44,7 @@ apkRename {
     flavors = [1:"preL", 2:"L"]
 }
 ```
-In this case my flavors correlate to the `versionCode` defined in my `productFlavors` block:
+Flavors map `versionCode` to `flavorName. The `versionCode`s are the same as the `versionCode`s defined in the `productFlavors` block:
 ```GRADLE
 android {
     // . . .
