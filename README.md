@@ -70,11 +70,11 @@ android {
 * `buildTypes` The build types that this naming configuration should be applied to.
 * `variants` The variants that this naming configuration should be applied to.
 * `include` Include additional parts to the name:
---* `workingDir` The Git working directory. This is either taken automatically or a custom value can be used by adding
+    * `workingDir` The Git working directory. This is either taken automatically or a custom value can be used by adding
 a build property for `gitBranch`.
---* `versionCode` The version code of the build variant
---* `versionName` The version name of the build variant. Flavor names will be appended here.
---* `date` The current date in the format `yyyyMMdd`. A custom value can be provided by using a build property for
+    * `versionCode` The version code of the build variant
+    * `versionName` The version name of the build variant. Flavor names will be appended here.
+    * `date` The current date in the format `yyyyMMdd`. A custom value can be provided by using a build property for
 `timestamp`.
 * `flavors` A mapping of flavor version codes and their names. The version codes are the same ones specified in the
  `productFlavors` block.
