@@ -45,7 +45,7 @@ apkRename {
 }
 ```
 
-Flavors map `versionCode` to `flavorName`. The `versionCode`s are the same as the `versionCode`s defined in the `productFlavors` block:
+`flavor`s map `versionCode` to `flavorName`. The `versionCode`s are the same as the `versionCode`s defined in the `productFlavors` block:
 
 ```GRADLE
 android {
