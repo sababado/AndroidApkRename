@@ -34,7 +34,11 @@ apkRename {
 ```
 ### Flavor Configuration
 It is also possible to provide a part to the name based on the flavor.
-This configurations can give the name: `IronMike-lollipop-release-dev-1.2.0.0.L-1200002-20150509.apk`
+This configuration can give the names:  
+`IronMike-lollipop-release-master-1.2.0.0.L-1200002-20150509.apk`  
+`IronMike-lollipop-beta-master-1.2.0.0.L-1200002-20150509.apk`  
+`IronMike-preLollipop-release-master-1.2.0.0.preL-1200002-20150509.apk`  
+`IronMike-preLollipop-beta-master-1.2.0.0.preL-1200002-20150509.apk`
 
 ```GRADLE
 apkRename {
