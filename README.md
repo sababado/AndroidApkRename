@@ -9,7 +9,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.sababado.android:apk-rename:1.0.0'
+        classpath 'com.sababado.android:apk-rename:1.1.0'
     }
 }
 ```
@@ -84,6 +84,7 @@ a build property for `gitBranch`.
 `timestamp`.
 * `flavors` A mapping of flavor version codes and their names. The version codes are the same ones specified in the
  `productFlavors` block.
+* `useFlavorNameAsAppName` Default is false. Set to true to use the name specified in the `flavors` mapping in place of the `applicationName`.
 
 Either a `buildType` or a `variant` must be provided. If both are provided then the variant will only be counted if
 it falls under one of the provided build types.
