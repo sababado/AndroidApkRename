@@ -31,6 +31,7 @@ class ApkRenamePlugin implements Plugin<Project> {
 
         // make per-variant version code
         project.android.applicationVariants.all { variant ->
+            println "Checking if the '${variant.buildType.name}' variant apk should be renamed..."
             if (shouldVariantBeRenamed(variant, apkRenameConfig)) {
                 // set the composite code
                 def appName = getAppName(variant, apkRenameConfig)
@@ -46,14 +47,17 @@ class ApkRenamePlugin implements Plugin<Project> {
 
                     def file = output.packageApplication.outputFile
                     def fileName = file.name.replace("app", appName).replace(".apk", nameExtras)
+                    println "Renaming this varient's apk to: ${fileName}"
                     output.packageApplication.outputFile = new File(file.parent, fileName)
                 }
+            } else {
+                println "Variant doesn't meet conditions to be renamed; skipping rename."
             }
         }
     }
 
     private static boolean shouldVariantBeRenamed(def variant, ApkRenameExtension apkRenameConfig) {
-        println "${variant.name} / ${variant.buildType.name}"
+//        println "${variant.name} / ${variant.buildType.name}"
         // check if the variant is in the build type
         // If there are build types then the variant must be in the build type.
         if (!apkRenameConfig.buildTypes || variant.buildType.name in apkRenameConfig.buildTypes) {
@@ -95,17 +99,36 @@ class ApkRenamePlugin implements Plugin<Project> {
      */
     static def getWorkingBranch(Project project) {
         if (!project.hasProperty("gitbranch")) {
-            def rootDir = project.rootDir
+            def gitDir = findGitDirectory(project.rootDir)
+            if(gitDir == null) {
+                return null
+            }
             // Triple double-quotes for the breaklines
-            def workingBranch = """git --git-dir=${rootDir}/../.git
-                               --work-tree=${rootDir}/..
+            def workingBranch = """git --git-dir=${gitDir}/../.git
+                               --work-tree=${gitDir}/..
                                rev-parse --abbrev-ref HEAD""".execute().text.trim()
-            println "Working gradle branch: " + workingBranch
+            println "Working gradle branch: ${workingBranch}"
             return workingBranch
         }
         def workingBranch = project.getProperties().get('gitbranch')
-        println "Working environment branch: " + workingBranch
+        println "Working environment branch: ${workingBranch}"
         return workingBranch
+    }
+
+    static def findGitDirectory(def rootDir) {
+        def dir = "${rootDir}"
+        def slash = '/'
+
+        while (dir.length() > 1) {
+            def folder = new File("${dir}/.git")
+            if (folder.exists()) {
+                return folder.getPath()
+            }
+
+            def lastIndex = dir.lastIndexOf(slash)
+            dir = dir.substring(0, lastIndex)
+        }
+        return null
     }
 
     /**
@@ -181,10 +204,15 @@ class ApkRenamePlugin implements Plugin<Project> {
 
         // set the output file name
         def nameExtras = ""
-        nameExtras += getNamePart(include, ApkNamePart.workingDir, "-${getWorkingBranch(project)}")
-        nameExtras += getNamePart(include, ApkNamePart.versionName, "-${vName}")
-        nameExtras += getNamePart(include, ApkNamePart.versionCode, "-${vCode}")
-        nameExtras += getNamePart(include, ApkNamePart.date, "-${getDate(project)}")
+        def tempNameExtras = getNamePart(include, ApkNamePart.workingDir, "${getWorkingBranch(project)}")
+        if(tempNameExtras == '') {
+            println "No git directory found, excluding from apk name."
+        } else {
+            nameExtras += tempNameExtras
+        }
+        nameExtras += getNamePart(include, ApkNamePart.versionName, "${vName}")
+        nameExtras += getNamePart(include, ApkNamePart.versionCode, "${vCode}")
+        nameExtras += getNamePart(include, ApkNamePart.date, "${getDate(project)}")
         nameExtras += ".apk"
 
         return nameExtras
@@ -200,9 +228,9 @@ class ApkRenamePlugin implements Plugin<Project> {
         return new FlavorPart("", 0);
     }
 
-    private static String getNamePart(ApkNamePart[] include, ApkNamePart namePart, String extra) {
-        if (include && namePart in include) {
-            return extra
+    private static String getNamePart(ApkNamePart[] include, ApkNamePart namePart, def extra) {
+        if (extra != null && extra != '' && include && namePart in include) {
+            return "-${extra}"
         }
         return ""
     }
