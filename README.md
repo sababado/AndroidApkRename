@@ -9,7 +9,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.sababado.android:apk-rename:1.1.0'
+        classpath 'com.sababado.android:apk-rename:1.1.1'
     }
 }
 ```
@@ -77,7 +77,9 @@ android {
 * `variants` The variants that this naming configuration should be applied to.
 * `include` Include additional parts to the name:
     * `workingDir` The Git working directory. This is either taken automatically or a custom value can be used by adding
-a build property for `gitBranch`.
+a build property for `gitBranch`. The automatic retrieval starts at the project's root directory and searches back to the root folder.
+For example if the root project directory is `/Users/rjszabo/Git/date-night/DateNight` the search will start there, looking for `.git`,
+and go backwards, stopping after looking in `/Users`.
     * `versionCode` The version code of the build variant
     * `versionName` The version name of the build variant. Flavor names will be appended here.
     * `date` The current date in the format `yyyyMMdd`. A custom value can be provided by using a build property for
@@ -88,6 +90,9 @@ a build property for `gitBranch`.
 
 Either a `buildType` or a `variant` must be provided. If both are provided then the variant will only be counted if
 it falls under one of the provided build types.
+
+# Logging
+If logs are needed, use the property `showRenameLogs`. For example append `-DshowRenameLogs` to the build execution command.
 
 # Backlog
 * Name is built based on the order of the `include` array
