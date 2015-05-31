@@ -24,14 +24,24 @@ import org.gradle.api.Project
 
 class ApkRenamePlugin implements Plugin<Project> {
 
+    static def showRenameLogs;
+
+    static void log(def message) {
+        if(showRenameLogs) {
+            println message
+        }
+    }
+
     void apply(Project project) {
         project.extensions.create("apkRename", ApkRenameExtension)
         ApkRenameExtension apkRenameConfig = project.apkRename
         project.afterEvaluate { validateExtension(apkRenameConfig) }
 
+        showRenameLogs = project.hasProperty("showRenameLogs")
+
         // make per-variant version code
         project.android.applicationVariants.all { variant ->
-            println "Checking if the '${variant.buildType.name}' variant apk should be renamed..."
+            log("Checking if the '${variant.buildType.name}' variant apk should be renamed...")
             if (shouldVariantBeRenamed(variant, apkRenameConfig)) {
                 // set the composite code
                 def appName = getAppName(variant, apkRenameConfig)
@@ -47,11 +57,11 @@ class ApkRenamePlugin implements Plugin<Project> {
 
                     def file = output.packageApplication.outputFile
                     def fileName = file.name.replace("app", appName).replace(".apk", nameExtras)
-                    println "Renaming this varient's apk to: ${fileName}"
+                    log("Renaming this varient's apk to: ${fileName}")
                     output.packageApplication.outputFile = new File(file.parent, fileName)
                 }
             } else {
-                println "Variant doesn't meet conditions to be renamed; skipping rename."
+                log("Variant doesn't meet conditions to be renamed; skipping rename.")
             }
         }
     }
@@ -85,10 +95,10 @@ class ApkRenamePlugin implements Plugin<Project> {
         if (!project.hasProperty("timestamp")) {
             def date = new Date()
             def formattedDate = date.format('yyyyMMdd')
-            println "Using gradle date"
+            log("Using gradle date")
             return formattedDate
         }
-        println "Using environment date"
+        log("Using environment date")
         return project.getProperties().get('timestamp')
     }
 
@@ -107,11 +117,11 @@ class ApkRenamePlugin implements Plugin<Project> {
             def workingBranch = """git --git-dir=${gitDir}/../.git
                                --work-tree=${gitDir}/..
                                rev-parse --abbrev-ref HEAD""".execute().text.trim()
-            println "Working gradle branch: ${workingBranch}"
+            log("Working gradle branch: ${workingBranch}")
             return workingBranch
         }
         def workingBranch = project.getProperties().get('gitbranch')
-        println "Working environment branch: ${workingBranch}"
+        log("Working environment branch: ${workingBranch}")
         return workingBranch
     }
 
@@ -206,7 +216,7 @@ class ApkRenamePlugin implements Plugin<Project> {
         def nameExtras = ""
         def tempNameExtras = getNamePart(include, ApkNamePart.workingDir, "${getWorkingBranch(project)}")
         if(tempNameExtras == '') {
-            println "No git directory found, excluding from apk name."
+            log("No git directory found, excluding from apk name.")
         } else {
             nameExtras += tempNameExtras
         }
