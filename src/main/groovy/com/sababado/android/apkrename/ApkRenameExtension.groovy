@@ -29,4 +29,5 @@ class ApkRenameExtension {
     String applicationName
     ApkNamePart[] include
     Map<Integer, String> flavors
+    boolean useFlavorNameAsAppName
 }

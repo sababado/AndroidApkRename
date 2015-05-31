@@ -33,7 +33,7 @@ class ApkRenamePlugin implements Plugin<Project> {
         project.android.applicationVariants.all { variant ->
             if (shouldVariantBeRenamed(variant, apkRenameConfig)) {
                 // set the composite code
-                def appName = apkRenameConfig.applicationName
+                def appName = getAppName(variant, apkRenameConfig)
 
                 // set the output file name
                 def nameExtras = buildApkNameExtras(project, variant, apkRenameConfig)
@@ -113,8 +113,12 @@ class ApkRenamePlugin implements Plugin<Project> {
      * @param apkRenameConfig Extension to validate.
      */
     private static void validateExtension(ApkRenameExtension apkRenameConfig) {
-        if (!apkRenameConfig.applicationName) {
+        if (!apkRenameConfig.applicationName && !apkRenameConfig.useFlavorNameAsAppName) {
             throw new RuntimeException("applicationName is required in apkRename.")
+        } else if (apkRenameConfig.useFlavorNameAsAppName) {
+            if (apkRenameConfig.flavors == null || apkRenameConfig.flavors.size() == 0) {
+                throw new RuntimeException("flavors are required in apkRename when useFlavorNameAsAppName is true.")
+            }
         }
         boolean emptyBuildTypes = false;
         if (!apkRenameConfig.buildTypes || apkRenameConfig.buildTypes.length == 0) {
@@ -128,6 +132,19 @@ class ApkRenamePlugin implements Plugin<Project> {
     }
 
     /**
+     * Get the application name based on the variant
+     * @param variant Variant to get the app name for
+     * @param apkRenameExtension Config that tells us what name to use.
+     * @return The application name.
+     */
+    private static String getAppName(def variant, ApkRenameExtension apkRenameExtension) {
+        if (apkRenameExtension.useFlavorNameAsAppName) {
+            return getFlavorPart(variant, apkRenameExtension.flavors).name
+        }
+        return apkRenameExtension.applicationName
+    }
+
+    /**
      * Build the APK name that goes after the app and variant name.
      * @param project The project.
      * @param variant The variant the name is changing for.
@@ -135,15 +152,28 @@ class ApkRenamePlugin implements Plugin<Project> {
      * @return A name with at least ".apk"
      */
     private static String buildApkNameExtras(Project project, def variant, ApkRenameExtension apkRenameConfig) {
-        println "***********  ${project.android.defaultConfig.versionCode}"
+        def vName = project.android.defaultConfig.versionName
+        def vCode = project.android.defaultConfig.versionCode
         FlavorPart flavorPart = getFlavorPart(variant, apkRenameConfig.flavors);
-        String flavorPartName = flavorPart.name
-        if (!flavorPartName?.isEmpty()) {
-            flavorPartName = ".${flavorPartName}"
+
+        if (!apkRenameConfig.useFlavorNameAsAppName) {
+            String flavorPartName = flavorPart.name
+            if (!flavorPartName?.isEmpty()) {
+                flavorPartName = ".${flavorPartName}"
+            }
+            if (vName) {
+                vName = project.android.defaultConfig.versionName + "${flavorPartName}"
+            } else {
+                vName = "${flavorPartName}"
+            }
         }
 
-        def vName = project.android.defaultConfig.versionName + "${flavorPartName}"
-        def vCode = project.android.defaultConfig.versionCode + flavorPart.apiVersion
+        if (vCode) {
+            vCode = project.android.defaultConfig.versionCode + flavorPart.apiVersion
+        } else {
+            vCode = flavorPart.apiVersion
+        }
+
         variant.mergedFlavor.versionName = vName
         variant.mergedFlavor.versionCode = vCode
 
