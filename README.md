@@ -92,7 +92,7 @@ Either a `buildType` or a `variant` must be provided. If both are provided then 
 it falls under one of the provided build types.
 
 # Logging
-If logs are needed, use the property `showRenameLogs`. For example append `-DshowRenameLogs` to the build execution command.
+If debug logs are needed, use the property `showRenameLogs`. For example append `-DshowRenameLogs` to the build execution command.
 
 # Backlog
 * Name is built based on the order of the `include` array
