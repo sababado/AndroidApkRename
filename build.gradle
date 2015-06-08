@@ -1,3 +1,7 @@
+plugins {
+    id "com.jfrog.bintray" version "1.1"
+}
+
 apply plugin: 'groovy'
 apply plugin: 'maven'
 
@@ -11,3 +15,45 @@ dependencies {
 }
 
 apply from: 'mvn_push.gradle'
+
+bintray {
+    user = 'rat141312'
+    key = BINTRAY_KEY
+
+    configurations = ['archives']
+
+    dryRun = false
+    publish = true
+
+    group = GROUP
+    version = VERSION_NAME
+
+    pkg {
+        repo = 'maven'
+        name = POM_ARTIFACT_ID
+        desc = POM_DESCRIPTION
+        websiteUrl = POM_URL
+        vcsUrl = POM_SCM_URL
+        licenses = [POM_LICENSE_NAME_SHORT]
+        labels = ['android','apk-rename','apk','android-plugin']
+        publicDownloadNumbers = true
+
+        version {
+            name = VERSION_NAME //Bintray logical version name
+            vcsTag = "v${VERSION_NAME}"
+//            attributes = ['gradle-plugin': 'com.sababado:com.sababdo.android:apk-rename'] //Optional version-level attributes
+            //Optional configuration for GPG signing
+//            gpg {
+//                sign = true //Determines whether to GPG sign the files. The default is false
+//                passphrase = 'passphrase' //Optional. The passphrase for GPG signing'
+//            }
+            //Optional configuration for Maven Central sync of the version
+//            mavenCentralSync {
+//                sync = true //Optional (true by default). Determines whether to sync the version to Maven Central.
+//                user = 'userToken' //OSS user token
+//                password = 'paasword' //OSS user password
+//                close = '1' //Optional property. By default the staging repository is closed and artifacts are released to Maven Central. You can optionally turn this behaviour off (by puting 0 as value) and release the version manually.
+//            }
+        }
+    }
+}
