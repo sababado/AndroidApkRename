@@ -130,12 +130,17 @@ class ApkRenamePlugin implements Plugin<Project> {
         def slash = '/'
 
         while (dir.length() > 1) {
+            // Find git folder
             def folder = new File("${dir}/.git")
             if (folder.exists()) {
                 return folder.getPath()
             }
 
+            // If it doesn't exist then look at the parent folder.
             def lastIndex = dir.lastIndexOf(slash)
+            if(lastIndex < 0) {
+                break;
+            }
             dir = dir.substring(0, lastIndex)
         }
         return null
@@ -210,19 +215,7 @@ class ApkRenamePlugin implements Plugin<Project> {
         variant.mergedFlavor.versionName = vName
         variant.mergedFlavor.versionCode = vCode
 
-        def include = apkRenameConfig.include
-
-        // set the output file name
-        def nameExtras = ""
-        def tempNameExtras = getNamePart(include, ApkNamePart.workingDir, "${getWorkingBranch(project)}")
-        if(tempNameExtras == '') {
-            log("No git directory found, excluding from apk name.")
-        } else {
-            nameExtras += tempNameExtras
-        }
-        nameExtras += getNamePart(include, ApkNamePart.versionName, "${vName}")
-        nameExtras += getNamePart(include, ApkNamePart.versionCode, "${vCode}")
-        nameExtras += getNamePart(include, ApkNamePart.date, "${getDate(project)}")
+        def nameExtras = getIncludePart(apkRenameConfig.include, project, vName, vCode)
         nameExtras += ".apk"
 
         return nameExtras
@@ -236,6 +229,33 @@ class ApkRenamePlugin implements Plugin<Project> {
             }
         }
         return new FlavorPart("", 0);
+    }
+
+    private static String getIncludePart(ApkNamePart[] include, Project project, def vName, def vCode) {
+        if(include == null) {
+            return ""
+        }
+        String nameExtras = ""
+        for(String namePart in include) {
+            if(namePart == ApkNamePart.workingDir.name()) {
+                def tempNameExtras = getNamePart(include, ApkNamePart.workingDir, "${getWorkingBranch(project)}")
+                if (tempNameExtras?.trim()) {
+                    log("No git directory found, excluding from apk name.")
+                } else {
+                    nameExtras += tempNameExtras
+                }
+            }
+            if(namePart == ApkNamePart.versionName.name()) {
+                nameExtras += getNamePart(include, ApkNamePart.versionName, "${vName}")
+            }
+            if(namePart == ApkNamePart.versionCode.name()) {
+                nameExtras += getNamePart(include, ApkNamePart.versionCode, "${vCode}")
+            }
+            if(namePart == ApkNamePart.date.name()) {
+                nameExtras += getNamePart(include, ApkNamePart.date, "${getDate(project)}")
+            }
+        }
+        return nameExtras
     }
 
     private static String getNamePart(ApkNamePart[] include, ApkNamePart namePart, def extra) {

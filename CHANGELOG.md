@@ -1,5 +1,9 @@
 # Android APK Rename Changelog
 
+# 1.1.2
+* Order of extra name parts depend on the order they are defined in the `include` array.
+* Fixing `workingDir` issue.
+
 # 1.1.1
 * Added more complete method for finding the git working directory.
 * Use `showRenameLogs` to view debug logs for the plugin.
