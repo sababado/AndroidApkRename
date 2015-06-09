@@ -9,7 +9,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.sababado.android:apk-rename:1.1.1'
+        classpath 'com.sababado.android:apk-rename:1.1.2'
     }
 }
 ```
@@ -75,7 +75,7 @@ android {
 * `applicationName` The name of the application
 * `buildTypes` The build types that this naming configuration should be applied to.
 * `variants` The variants that this naming configuration should be applied to.
-* `include` Include additional parts to the name:
+* `include` Include additional parts to the name. This part of the name is built on the order of the values given:
     * `workingDir` The Git working directory. This is either taken automatically or a custom value can be used by adding
 a build property for `gitBranch`. The automatic retrieval starts at the project's root directory and searches back to the root folder.
 For example if the root project directory is `/Users/rjszabo/Git/date-night/DateNight` the search will start there, looking for `.git`,
