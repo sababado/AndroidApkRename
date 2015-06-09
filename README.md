@@ -2,14 +2,17 @@
 
 This plugin will rename your APK in the build process based on a configuration specified in your own build script.
 
+View the change log [here](https://github.com/sababado/AndroidApkRename/blob/master/CHANGELOG.md).
+
 ## Include the buildscript dependency
+**Note** The library is now on `jcenter()` and the artifact name is changing from `apk-rename` to `AndroidApkRename`.
 ```GRADLE
 buildscript {
     repositories {
-        mavenCentral()
+        jcenter()
     }
     dependencies {
-        classpath 'com.sababado.android:apk-rename:1.1.2'
+        classpath 'com.sababado.android:AndroidApkRename:1.1.2'
     }
 }
 ```
