@@ -95,7 +95,6 @@ it falls under one of the provided build types.
 If debug logs are needed, use the property `showRenameLogs`. For example append `-DshowRenameLogs` to the build execution command.
 
 # Backlog
-* Name is built based on the order of the `include` array
 * provide the option to remove the full flavor name
 * Better flavor support (ex: different app name per flavor)
 * Provide a custom name to replace the entire name
